@@ -13,7 +13,8 @@ logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-CASCADE_DIR = "/usr/local/Cellar/opencv/2.4.12_2/share/OpenCV/haarcascades/"
+dirname = os.path.dirname(os.path.realpath(__file__))
+CASCADE_DIR = os.path.join(dirname, '../haarcascades/')
 
 
 def capture_webcam_img():
@@ -74,6 +75,8 @@ def main(argv=sys.argv[1:]):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--clear-test-img', action='store_true', default=False,
                         help='Clear the test image from disk and create a new one via webcam')
+    parser.add_argument('--cascade-dir', type=str, default=CASCADE_DIR,
+                        help="Path to the opencv cascade directories.")
 
     args = parser.parse_args(argv)
     face_cascade = cv2.CascadeClassifier(os.path.join(CASCADE_DIR,

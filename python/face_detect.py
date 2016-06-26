@@ -13,6 +13,8 @@ logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
+CASCADE_DIR = "/usr/local/Cellar/opencv/2.4.12_2/share/OpenCV/haarcascades/"
+
 
 def capture_webcam_img():
     """Capture a single image with the webcame"""
@@ -31,14 +33,17 @@ def load_test_img(test_filename='test/test_img.png', clear_test_img=False):
 
     :return: (M, N, 3) color opencv image array.
     """
-    if os.path.exists(test_filename) and not clear_test_img:
+    dirname = os.path.dirname(os.path.realpath(__file__))
+    img_filepath = os.path.join(dirname, test_filename)
+    if os.path.exists(img_filepath) and not clear_test_img:
         return cv2.imread(test_filename)
-    elif os.path.exists(test_filename) and clear_test_img:
-        logger.info('Clearing test file.')
+    elif os.path.exists(img_filepath) and clear_test_img:
+        logger.info('Clearing test file at {}'.format(img_filepath))
         os.remove(test_filename)
 
     frame = capture_webcam_img()
-    cv2.imwrite(test_filename, frame)
+    logger.info('Writing img to file at {}'.format(img_filepath))
+    cv2.imwrite(img_filepath, frame)
     return frame
 
 def detect_face(img, classifier):
@@ -52,9 +57,9 @@ def detect_face(img, classifier):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     faces = classifier.detectMultiScale(gray,
                                         scaleFactor=1.3,
-                                        minNeighbors=5,
+                                        minNeighbors=3,
                                         minSize=(30, 30),
-                                        flags=cv2.cv.CV_HAAR_SCALE_IMAGE)
+                                        flags=cv2.CASCADE_SCALE_IMAGE)
     if len(faces) == 0:
         logger.warning('No faces detected!')
     for (x, y, w, h) in faces:
@@ -70,8 +75,9 @@ def main(argv=sys.argv[1:]):
                         help='Clear the test image from disk and create a new one via webcam')
 
     args = parser.parse_args(argv)
-    face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
-    eye_cascade = cv2.CascadeClassifier('haarcascade_eye.xml')
+    face_cascade = cv2.CascadeClassifier(os.path.join(CASCADE_DIR,
+        'haarcascade_frontalface_default.xml'))
+    eye_cascade = cv2.CascadeClassifier(os.path.join(CASCADE_DIR, 'haarcascade_eye.xml'))
 
     img = load_test_img(clear_test_img=args.clear_test_img)
     detect_img = detect_face(img, face_cascade)

@@ -84,7 +84,6 @@ def main(argv=sys.argv[1:]):
     eye_cascade = cv2.CascadeClassifier(os.path.join(CASCADE_DIR, 'haarcascade_eye.xml'))
 
     img = load_test_img(clear_test_img=args.clear_test_img)
-    print img.shape
     detect_img = detect_face(img, face_cascade)
     cv2.imshow('test', detect_img)
     cv2.waitKey(0)
